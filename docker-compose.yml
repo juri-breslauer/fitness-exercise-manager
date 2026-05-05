@@ -1,0 +1,55 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fitness_exercise_app
+    ports:
+      - "${APP_PORT:-8001}:8000"
+    volumes:
+      - .:/var/www/html
+      - vendor:/var/www/html/vendor
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    environment:
+      APP_ENV: local
+      DB_CONNECTION: pgsql
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: fitness_exercise_manager
+      DB_USERNAME: fitness
+      DB_PASSWORD: secret
+      REDIS_HOST: redis
+
+  postgres:
+    image: postgres:17-alpine
+    container_name: fitness_exercise_postgres
+    ports:
+      - "${POSTGRES_PORT:-54320}:5432"
+    environment:
+      POSTGRES_DB: fitness_exercise_manager
+      POSTGRES_USER: fitness
+      POSTGRES_PASSWORD: secret
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fitness -d fitness_exercise_manager"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: fitness_exercise_redis
+    ports:
+      - "${HOST_REDIS_PORT:-63790}:6379"
+    volumes:
+      - redis_data:/data
+
+volumes:
+  postgres_data:
+  redis_data:
+  vendor:
