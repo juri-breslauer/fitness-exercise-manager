@@ -5,7 +5,7 @@ services:
       dockerfile: Dockerfile
     container_name: fitness_exercise_app
     ports:
-      - "8000:8000"
+      - "${APP_PORT:-8001}:8000"
     volumes:
       - .:/var/www/html
       - vendor:/var/www/html/vendor

@@ -35,7 +35,7 @@ docker compose exec app php artisan key:generate
 docker compose exec app php artisan migrate --seed
 ```
 
-The application is available at `http://localhost:8000`. PostgreSQL is exposed on host port `54320` and Redis on host port `63790` by default.
+The application is available at `http://localhost:8001` by default. PostgreSQL is exposed on host port `54320` and Redis on host port `63790`.
 
 ## Import Exercises
 
