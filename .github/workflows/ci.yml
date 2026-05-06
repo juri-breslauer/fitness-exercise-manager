@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  php:
+    name: PHP Quality
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          coverage: none
+          tools: composer:v2
+          extensions: mbstring, pdo_sqlite, sqlite3
+
+      - name: Validate Composer files
+        run: composer validate --strict
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --no-progress --prefer-dist
+
+      - name: Run PHPUnit
+        run: composer test
+
+      - name: Run Pint
+        run: vendor/bin/pint --test
+
+      - name: Run static checks
+        run: |
+          composer dump-autoload --strict-psr
+          find app bootstrap config database routes tests -name '*.php' -print0 | xargs -0 -n 1 php -l
+
+          if [ -x vendor/bin/phpstan ]; then
+            vendor/bin/phpstan analyse
+          elif [ -x vendor/bin/psalm ]; then
+            vendor/bin/psalm --no-progress
+          else
+            echo "No PHPStan or Psalm binary found; completed Composer PSR and PHP syntax checks."
+          fi
