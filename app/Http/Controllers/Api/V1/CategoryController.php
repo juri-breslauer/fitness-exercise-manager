@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\CategoryResource;
+use App\Http\Resources\Api\V1\CategoryResource;
 use App\Models\Category;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 

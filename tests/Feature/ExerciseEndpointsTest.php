@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Category;
 use App\Models\Equipment;
 use App\Models\Exercise;
+use App\Models\ExerciseMedia;
 use App\Models\Muscle;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -24,6 +25,19 @@ class ExerciseEndpointsTest extends TestCase
         $pushUp->primaryMuscles()->attach($chest, ['role' => Exercise::MUSCLE_ROLE_PRIMARY]);
         $pushUp->secondaryMuscles()->attach($triceps, ['role' => Exercise::MUSCLE_ROLE_SECONDARY]);
         $pushUp->equipment()->attach($floor, ['is_optional' => false]);
+        ExerciseMedia::factory()->for($pushUp)->create([
+            'type' => ExerciseMedia::TYPE_GIF,
+            'url' => 'https://example.com/push-up-demo.gif',
+            'position' => 2,
+            'is_primary' => false,
+            'metadata' => ['alt' => 'Push-up demo'],
+        ]);
+        ExerciseMedia::factory()->for($pushUp)->primary()->create([
+            'type' => ExerciseMedia::TYPE_IMAGE,
+            'url' => 'https://example.com/push-up.jpg',
+            'position' => 1,
+            'metadata' => ['alt' => 'Push-up start'],
+        ]);
 
         Exercise::factory()->for($category)->create(['name' => 'Bench Press', 'slug' => 'bench-press']);
         Exercise::factory()->for($category)->draft()->create(['name' => 'Draft Lift', 'slug' => 'draft-lift']);
@@ -34,6 +48,8 @@ class ExerciseEndpointsTest extends TestCase
             ->assertJsonPath('data.0.name', 'Bench Press')
             ->assertJsonPath('data.0.slug', 'bench-press')
             ->assertJsonPath('data.0.category.slug', 'strength')
+            ->assertJsonPath('data.0.media', [])
+            ->assertJsonPath('data.0.primary_media', null)
             ->assertJsonPath('data.1.name', 'Push Up')
             ->assertJsonPath('data.1.primary_muscles.0.slug', 'chest')
             ->assertJsonPath('data.1.primary_muscles.0.role', Exercise::MUSCLE_ROLE_PRIMARY)
@@ -41,6 +57,14 @@ class ExerciseEndpointsTest extends TestCase
             ->assertJsonPath('data.1.secondary_muscles.0.role', Exercise::MUSCLE_ROLE_SECONDARY)
             ->assertJsonPath('data.1.equipment.0.slug', 'floor')
             ->assertJsonPath('data.1.equipment.0.is_optional', false)
+            ->assertJsonPath('data.1.media.0.type', ExerciseMedia::TYPE_IMAGE)
+            ->assertJsonPath('data.1.media.0.url', 'https://example.com/push-up.jpg')
+            ->assertJsonPath('data.1.media.0.is_primary', true)
+            ->assertJsonPath('data.1.media.0.position', 1)
+            ->assertJsonPath('data.1.media.0.metadata.alt', 'Push-up start')
+            ->assertJsonPath('data.1.media.1.type', ExerciseMedia::TYPE_GIF)
+            ->assertJsonPath('data.1.primary_media.type', ExerciseMedia::TYPE_IMAGE)
+            ->assertJsonPath('data.1.primary_media.url', 'https://example.com/push-up.jpg')
             ->assertJsonStructure([
                 'data' => [
                     '*' => [
@@ -67,6 +91,10 @@ class ExerciseEndpointsTest extends TestCase
                         'equipment' => [
                             '*' => ['id', 'name', 'slug', 'is_optional'],
                         ],
+                        'media' => [
+                            '*' => ['id', 'type', 'url', 'disk', 'path', 'source', 'position', 'is_primary', 'metadata'],
+                        ],
+                        'primary_media',
                     ],
                 ],
             ]);
@@ -282,6 +310,21 @@ class ExerciseEndpointsTest extends TestCase
         $exercise->primaryMuscles()->attach($chest, ['role' => Exercise::MUSCLE_ROLE_PRIMARY]);
         $exercise->secondaryMuscles()->attach($triceps, ['role' => Exercise::MUSCLE_ROLE_SECONDARY]);
         $exercise->equipment()->attach($bench, ['is_optional' => true]);
+        ExerciseMedia::factory()->for($exercise)->primary()->create([
+            'type' => ExerciseMedia::TYPE_IMAGE,
+            'url' => 'https://example.com/push-up-primary.jpg',
+            'disk' => null,
+            'path' => null,
+            'source' => 'test',
+            'position' => 1,
+            'metadata' => ['alt' => 'Primary push-up media'],
+        ]);
+        ExerciseMedia::factory()->for($exercise)->create([
+            'type' => ExerciseMedia::TYPE_VIDEO,
+            'url' => 'https://example.com/push-up-video.mp4',
+            'position' => 2,
+            'is_primary' => false,
+        ]);
 
         $this->getJson('/api/v1/exercises/'.$exercise->slug)
             ->assertOk()
@@ -299,7 +342,33 @@ class ExerciseEndpointsTest extends TestCase
             ->assertJsonPath('data.secondary_muscles.0.slug', 'triceps')
             ->assertJsonPath('data.secondary_muscles.0.role', Exercise::MUSCLE_ROLE_SECONDARY)
             ->assertJsonPath('data.equipment.0.slug', 'bench')
-            ->assertJsonPath('data.equipment.0.is_optional', true);
+            ->assertJsonPath('data.equipment.0.is_optional', true)
+            ->assertJsonPath('data.media.0.type', ExerciseMedia::TYPE_IMAGE)
+            ->assertJsonPath('data.media.0.url', 'https://example.com/push-up-primary.jpg')
+            ->assertJsonPath('data.media.0.source', 'test')
+            ->assertJsonPath('data.media.0.position', 1)
+            ->assertJsonPath('data.media.0.is_primary', true)
+            ->assertJsonPath('data.media.0.metadata.alt', 'Primary push-up media')
+            ->assertJsonPath('data.media.1.type', ExerciseMedia::TYPE_VIDEO)
+            ->assertJsonPath('data.primary_media.type', ExerciseMedia::TYPE_IMAGE)
+            ->assertJsonPath('data.primary_media.url', 'https://example.com/push-up-primary.jpg');
+    }
+
+    public function test_exercise_media_belongs_to_exercise_and_is_deleted_with_exercise(): void
+    {
+        $exercise = Exercise::factory()->create();
+        $media = ExerciseMedia::factory()->for($exercise)->create([
+            'type' => ExerciseMedia::TYPE_IMAGE,
+        ]);
+
+        $this->assertTrue($media->exercise->is($exercise));
+        $this->assertTrue($exercise->media->first()->is($media));
+
+        $exercise->delete();
+
+        $this->assertDatabaseMissing('exercise_media', [
+            'id' => $media->id,
+        ]);
     }
 
     public function test_exercise_show_endpoint_does_not_return_draft_exercises(): void

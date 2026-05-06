@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Resources;
+namespace App\Http\Resources\Api\V1;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class MuscleResource extends JsonResource
+class EquipmentResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -18,7 +18,7 @@ class MuscleResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'slug' => $this->slug,
-            'role' => $this->whenPivotLoaded('exercise_muscle', fn (): string => $this->pivot->role),
+            'is_optional' => $this->whenPivotLoaded('exercise_equipment', fn (): bool => (bool) $this->pivot->is_optional),
         ];
     }
 }

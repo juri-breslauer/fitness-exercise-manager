@@ -1,9 +1,9 @@
 <?php
 
-use App\Http\Controllers\Api\CategoryController;
-use App\Http\Controllers\Api\EquipmentController;
-use App\Http\Controllers\Api\MuscleController;
+use App\Http\Controllers\Api\V1\CategoryController;
+use App\Http\Controllers\Api\V1\EquipmentController;
 use App\Http\Controllers\Api\V1\ExerciseController;
+use App\Http\Controllers\Api\V1\MuscleController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function (): void {
