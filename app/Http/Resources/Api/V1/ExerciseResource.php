@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Resources;
+namespace App\Http\Resources\Api\V1;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -32,6 +32,8 @@ class ExerciseResource extends JsonResource
             'primary_muscles' => MuscleResource::collection($this->whenLoaded('primaryMuscles')),
             'secondary_muscles' => MuscleResource::collection($this->whenLoaded('secondaryMuscles')),
             'equipment' => EquipmentResource::collection($this->whenLoaded('equipment')),
+            'media' => ExerciseMediaResource::collection($this->whenLoaded('media')),
+            'primary_media' => new ExerciseMediaResource($this->whenLoaded('primaryMedia')),
         ];
     }
 }

@@ -62,7 +62,7 @@ class ExerciseQuery
     private function baseQuery(): Builder
     {
         return Exercise::query()
-            ->with(['category', 'primaryMuscles', 'secondaryMuscles', 'equipment']);
+            ->with(['category', 'primaryMuscles', 'secondaryMuscles', 'equipment', 'media', 'primaryMedia']);
     }
 
     /**

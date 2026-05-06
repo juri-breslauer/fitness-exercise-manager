@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Category;
 use App\Models\Exercise;
+use App\Models\ExerciseMedia;
 use Illuminate\Database\Seeder;
 
 class ExerciseSeeder extends Seeder
@@ -38,6 +39,24 @@ class ExerciseSeeder extends Seeder
                 'force' => 'push',
                 'mechanic' => 'compound',
                 'status' => 'published',
+                'media' => [
+                    [
+                        'type' => ExerciseMedia::TYPE_IMAGE,
+                        'url' => 'https://example.com/exercises/push-up/primary.jpg',
+                        'source' => 'seed',
+                        'position' => 1,
+                        'is_primary' => true,
+                        'metadata' => ['alt' => 'Push-up starting position'],
+                    ],
+                    [
+                        'type' => ExerciseMedia::TYPE_GIF,
+                        'url' => 'https://example.com/exercises/push-up/demo.gif',
+                        'source' => 'seed',
+                        'position' => 2,
+                        'is_primary' => false,
+                        'metadata' => ['alt' => 'Push-up movement demo'],
+                    ],
+                ],
             ],
             [
                 'category_id' => $strength->id,
@@ -59,6 +78,16 @@ class ExerciseSeeder extends Seeder
                 'force' => 'push',
                 'mechanic' => 'compound',
                 'status' => 'published',
+                'media' => [
+                    [
+                        'type' => ExerciseMedia::TYPE_IMAGE,
+                        'url' => 'https://example.com/exercises/bodyweight-squat/primary.jpg',
+                        'source' => 'seed',
+                        'position' => 1,
+                        'is_primary' => true,
+                        'metadata' => ['alt' => 'Bodyweight squat position'],
+                    ],
+                ],
             ],
             [
                 'category_id' => $cardio->id,
@@ -80,6 +109,16 @@ class ExerciseSeeder extends Seeder
                 'force' => 'push',
                 'mechanic' => 'compound',
                 'status' => 'published',
+                'media' => [
+                    [
+                        'type' => ExerciseMedia::TYPE_VIDEO,
+                        'url' => 'https://example.com/exercises/jumping-jack/demo.mp4',
+                        'source' => 'seed',
+                        'position' => 1,
+                        'is_primary' => true,
+                        'metadata' => ['duration_seconds' => 12],
+                    ],
+                ],
             ],
             [
                 'category_id' => $mobility->id,
@@ -101,10 +140,21 @@ class ExerciseSeeder extends Seeder
                 'force' => 'static',
                 'mechanic' => null,
                 'status' => 'published',
+                'media' => [],
             ],
-        ])->each(fn (array $exercise) => Exercise::query()->updateOrCreate(
-            ['slug' => $exercise['slug']],
-            $exercise
-        ));
+        ])->each(function (array $exercise): void {
+            $media = $exercise['media'];
+            unset($exercise['media']);
+
+            $exerciseModel = Exercise::query()->updateOrCreate(
+                ['slug' => $exercise['slug']],
+                $exercise
+            );
+
+            collect($media)->each(fn (array $mediaItem) => $exerciseModel->media()->updateOrCreate(
+                ['position' => $mediaItem['position']],
+                $mediaItem
+            ));
+        });
     }
 }
