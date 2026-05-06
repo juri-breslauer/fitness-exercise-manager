@@ -29,6 +29,9 @@ class ExerciseResource extends JsonResource
             'mechanic' => $this->mechanic,
             'status' => $this->status,
             'category' => new CategoryResource($this->whenLoaded('category')),
+            'primary_muscles' => MuscleResource::collection($this->whenLoaded('primaryMuscles')),
+            'secondary_muscles' => MuscleResource::collection($this->whenLoaded('secondaryMuscles')),
+            'equipment' => EquipmentResource::collection($this->whenLoaded('equipment')),
         ];
     }
 }

@@ -14,11 +14,19 @@ class ExerciseController extends Controller
     {
         return ExerciseResource::collection(
             Exercise::query()
-                ->with('category')
+                ->with(['category', 'primaryMuscles', 'secondaryMuscles', 'equipment'])
                 ->where('status', 'published')
                 ->when(
                     $request->query('category'),
                     fn ($query, string $category) => $query->whereRelation('category', 'slug', $category)
+                )
+                ->when(
+                    $request->query('muscle'),
+                    fn ($query, string $muscle) => $query->whereRelation('muscles', 'slug', $muscle)
+                )
+                ->when(
+                    $request->query('equipment'),
+                    fn ($query, string $equipment) => $query->whereRelation('equipment', 'slug', $equipment)
                 )
                 ->orderBy('name')
                 ->get()
@@ -29,6 +37,6 @@ class ExerciseController extends Controller
     {
         abort_if($exercise->status !== 'published', 404);
 
-        return new ExerciseResource($exercise->load('category'));
+        return new ExerciseResource($exercise->load(['category', 'primaryMuscles', 'secondaryMuscles', 'equipment']));
     }
 }

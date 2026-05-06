@@ -18,6 +18,7 @@ class MuscleResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'slug' => $this->slug,
+            'role' => $this->whenPivotLoaded('exercise_muscle', fn (): string => $this->pivot->role),
         ];
     }
 }

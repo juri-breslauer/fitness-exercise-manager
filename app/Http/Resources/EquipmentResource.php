@@ -18,6 +18,7 @@ class EquipmentResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'slug' => $this->slug,
+            'is_optional' => $this->whenPivotLoaded('exercise_equipment', fn (): bool => (bool) $this->pivot->is_optional),
         ];
     }
 }
