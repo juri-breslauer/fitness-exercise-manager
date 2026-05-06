@@ -47,11 +47,27 @@ php artisan exercises:import
 
 ## API Endpoints
 
-| Method | Endpoint              | Description              |
-| ------ | --------------------- | ------------------------ |
-| GET    | `/api/exercises`      | List exercises           |
-| GET    | `/api/exercises/{id}` | Show exercise details    |
-| GET    | `/api/categories`     | List exercise categories |
+Taxonomy endpoints return JSON API Resource collections ordered by `name`.
+
+| Method | Endpoint          | Description              |
+| ------ | ----------------- | ------------------------ |
+| GET    | `/api/categories` | List exercise categories |
+| GET    | `/api/muscles`    | List muscles             |
+| GET    | `/api/equipment`  | List equipment           |
+
+Example response:
+
+```json
+{
+  "data": [
+    {
+      "id": 1,
+      "name": "Strength",
+      "slug": "strength"
+    }
+  ]
+}
+```
 
 ## Project Structure
 
