@@ -126,6 +126,142 @@ class ExerciseEndpointsTest extends TestCase
             ->assertJsonPath('data.0.equipment.0.is_optional', false);
     }
 
+    public function test_exercises_endpoint_searches_by_name_and_display_name(): void
+    {
+        $category = Category::factory()->create();
+
+        Exercise::factory()->for($category)->create([
+            'name' => 'Cable Curl',
+            'display_name' => null,
+            'slug' => 'cable-curl',
+        ]);
+        Exercise::factory()->for($category)->create([
+            'name' => 'Arm Flexion',
+            'display_name' => 'Dumbbell Curl',
+            'slug' => 'arm-flexion',
+        ]);
+        Exercise::factory()->for($category)->create([
+            'name' => 'Bench Press',
+            'display_name' => 'Chest Press',
+            'slug' => 'bench-press',
+        ]);
+
+        $this->getJson('/api/v1/exercises?search=curl')
+            ->assertOk()
+            ->assertJsonCount(2, 'data')
+            ->assertJsonPath('data.0.slug', 'arm-flexion')
+            ->assertJsonPath('data.1.slug', 'cable-curl');
+    }
+
+    public function test_exercises_endpoint_filters_by_exercise_attributes(): void
+    {
+        $category = Category::factory()->create();
+
+        Exercise::factory()->for($category)->create([
+            'name' => 'Dumbbell Curl',
+            'slug' => 'dumbbell-curl',
+            'difficulty' => 'beginner',
+            'force' => 'pull',
+            'mechanic' => 'isolation',
+            'status' => 'published',
+        ]);
+        Exercise::factory()->for($category)->create([
+            'name' => 'Barbell Squat',
+            'slug' => 'barbell-squat',
+            'difficulty' => 'intermediate',
+            'force' => 'push',
+            'mechanic' => 'compound',
+            'status' => 'published',
+        ]);
+        Exercise::factory()->for($category)->draft()->create([
+            'name' => 'Draft Curl',
+            'slug' => 'draft-curl',
+            'difficulty' => 'beginner',
+            'force' => 'pull',
+            'mechanic' => 'isolation',
+        ]);
+
+        $this->getJson('/api/v1/exercises?difficulty=beginner&force=pull&mechanic=isolation&status=published')
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.slug', 'dumbbell-curl');
+    }
+
+    public function test_exercises_endpoint_paginates_with_default_and_custom_per_page(): void
+    {
+        $category = Category::factory()->create();
+
+        for ($exerciseNumber = 1; $exerciseNumber <= 25; $exerciseNumber++) {
+            Exercise::factory()->for($category)->create([
+                'name' => sprintf('Exercise %02d', $exerciseNumber),
+                'slug' => sprintf('exercise-%02d', $exerciseNumber),
+            ]);
+        }
+
+        $this->getJson('/api/v1/exercises')
+            ->assertOk()
+            ->assertJsonCount(20, 'data')
+            ->assertJsonPath('meta.per_page', 20)
+            ->assertJsonPath('meta.current_page', 1)
+            ->assertJsonPath('meta.total', 25);
+
+        $this->getJson('/api/v1/exercises?page=2&per_page=10')
+            ->assertOk()
+            ->assertJsonCount(10, 'data')
+            ->assertJsonPath('data.0.slug', 'exercise-11')
+            ->assertJsonPath('meta.per_page', 10)
+            ->assertJsonPath('meta.current_page', 2);
+    }
+
+    public function test_exercises_endpoint_sorts_by_whitelisted_fields(): void
+    {
+        $category = Category::factory()->create();
+
+        Exercise::factory()->for($category)->create([
+            'name' => 'Beginner Curl',
+            'slug' => 'beginner-curl',
+            'difficulty' => 'beginner',
+            'created_at' => now()->subDays(2),
+        ]);
+        Exercise::factory()->for($category)->create([
+            'name' => 'Expert Curl',
+            'slug' => 'expert-curl',
+            'difficulty' => 'expert',
+            'created_at' => now(),
+        ]);
+        Exercise::factory()->for($category)->create([
+            'name' => 'Intermediate Curl',
+            'slug' => 'intermediate-curl',
+            'difficulty' => 'intermediate',
+            'created_at' => now()->subDay(),
+        ]);
+
+        $this->getJson('/api/v1/exercises?sort=-created_at')
+            ->assertOk()
+            ->assertJsonPath('data.0.slug', 'expert-curl')
+            ->assertJsonPath('data.1.slug', 'intermediate-curl')
+            ->assertJsonPath('data.2.slug', 'beginner-curl');
+
+        $this->getJson('/api/v1/exercises?sort=difficulty')
+            ->assertOk()
+            ->assertJsonPath('data.0.slug', 'beginner-curl')
+            ->assertJsonPath('data.1.slug', 'expert-curl')
+            ->assertJsonPath('data.2.slug', 'intermediate-curl');
+    }
+
+    public function test_exercises_endpoint_validates_query_parameters(): void
+    {
+        $this->getJson('/api/v1/exercises?category=unknown&difficulty=advanced&per_page=101&sort=slug&status=draft')
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors([
+                'category',
+                'difficulty',
+                'per_page',
+                'sort',
+                'status',
+            ]);
+    }
+
     public function test_exercise_show_endpoint_returns_exercise_by_slug(): void
     {
         $category = Category::factory()->create(['name' => 'Strength', 'slug' => 'strength']);

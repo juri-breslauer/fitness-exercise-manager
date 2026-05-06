@@ -17,7 +17,7 @@ class TaxonomyEndpointsTest extends TestCase
         Category::factory()->create(['name' => 'Strength', 'slug' => 'strength']);
         Category::factory()->create(['name' => 'Cardio', 'slug' => 'cardio']);
 
-        $this->getJson('/api/categories')
+        $this->getJson('/api/v1/categories')
             ->assertOk()
             ->assertJsonPath('data.0.name', 'Cardio')
             ->assertJsonPath('data.0.slug', 'cardio')
@@ -34,7 +34,7 @@ class TaxonomyEndpointsTest extends TestCase
         Muscle::factory()->create(['name' => 'Triceps', 'slug' => 'triceps']);
         Muscle::factory()->create(['name' => 'Biceps', 'slug' => 'biceps']);
 
-        $this->getJson('/api/muscles')
+        $this->getJson('/api/v1/muscles')
             ->assertOk()
             ->assertJsonPath('data.0.name', 'Biceps')
             ->assertJsonPath('data.0.slug', 'biceps')
@@ -51,7 +51,7 @@ class TaxonomyEndpointsTest extends TestCase
         Equipment::factory()->create(['name' => 'Dumbbells', 'slug' => 'dumbbells']);
         Equipment::factory()->create(['name' => 'Barbell', 'slug' => 'barbell']);
 
-        $this->getJson('/api/equipment')
+        $this->getJson('/api/v1/equipment')
             ->assertOk()
             ->assertJsonPath('data.0.name', 'Barbell')
             ->assertJsonPath('data.0.slug', 'barbell')

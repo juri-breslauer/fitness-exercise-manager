@@ -3,33 +3,18 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\V1\ListExercisesRequest;
 use App\Http\Resources\ExerciseResource;
 use App\Models\Exercise;
-use Illuminate\Http\Request;
+use App\Queries\ExerciseQuery;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class ExerciseController extends Controller
 {
-    public function index(Request $request): AnonymousResourceCollection
+    public function index(ListExercisesRequest $request, ExerciseQuery $exercises): AnonymousResourceCollection
     {
         return ExerciseResource::collection(
-            Exercise::query()
-                ->with(['category', 'primaryMuscles', 'secondaryMuscles', 'equipment'])
-                ->where('status', 'published')
-                ->when(
-                    $request->query('category'),
-                    fn ($query, string $category) => $query->whereRelation('category', 'slug', $category)
-                )
-                ->when(
-                    $request->query('muscle'),
-                    fn ($query, string $muscle) => $query->whereRelation('muscles', 'slug', $muscle)
-                )
-                ->when(
-                    $request->query('equipment'),
-                    fn ($query, string $equipment) => $query->whereRelation('equipment', 'slug', $equipment)
-                )
-                ->orderBy('name')
-                ->get()
+            $exercises->paginate($request->validated(), $request->perPage())
         );
     }
 
