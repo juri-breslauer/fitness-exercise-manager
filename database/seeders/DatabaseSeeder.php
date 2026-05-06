@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             CategorySeeder::class,
             MuscleSeeder::class,
             EquipmentSeeder::class,
+            ExerciseSeeder::class,
         ]);
 
         // User::factory(10)->create();
