@@ -115,6 +115,14 @@ to those records through `exercise_muscle` and `exercise_equipment`.
 
 Admins import exercise datasets from the Filament admin panel at `/admin`.
 
+## Admin Access
+
+Filament admin access is restricted to authenticated users with
+`users.is_admin = true`. Catalog management actions are protected by model
+policies for categories, muscles, equipment, exercises, and exercise media.
+
+See [`docs/admin.md`](docs/admin.md) for the complete admin access rules.
+
 ## API Endpoints
 
 The public exercise catalog API is versioned under `/api/v1`. Full request and
