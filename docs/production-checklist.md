@@ -1,6 +1,8 @@
 # Production Checklist
 
-Use this checklist before promoting a release.
+Use this checklist before promoting a release. Items are intentionally left
+unchecked in the repository and should be checked only during a real deployment
+or release verification pass.
 
 ## Application
 
