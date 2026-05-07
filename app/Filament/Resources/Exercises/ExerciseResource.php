@@ -16,6 +16,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class ExerciseResource extends Resource
 {
@@ -23,11 +24,20 @@ class ExerciseResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
+    protected static string|UnitEnum|null $navigationGroup = 'Content';
+
     protected static ?string $navigationLabel = 'Exercises';
+
+    protected static ?int $navigationSort = 10;
 
     protected static ?string $modelLabel = 'Exercise';
 
     protected static ?string $pluralModelLabel = 'Exercises';
+
+    public static function getNavigationBadge(): ?string
+    {
+        return (string) Exercise::query()->count();
+    }
 
     public static function form(Schema $schema): Schema
     {

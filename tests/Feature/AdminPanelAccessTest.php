@@ -57,4 +57,13 @@ class AdminPanelAccessTest extends TestCase
         $this->get('/admin/exercises/'.$exercise->id.'/edit')->assertOk();
         $this->get('/admin/exercise-media')->assertOk();
     }
+
+    public function test_admin_user_can_access_exercise_import_page(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        $this->actingAs($admin)
+            ->get('/admin/import-exercises')
+            ->assertOk();
+    }
 }

@@ -13,18 +13,28 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class EquipmentResource extends Resource
 {
     protected static ?string $model = Equipment::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedWrenchScrewdriver;
+
+    protected static string|UnitEnum|null $navigationGroup = 'Content';
 
     protected static ?string $navigationLabel = 'Equipment';
+
+    protected static ?int $navigationSort = 40;
 
     protected static ?string $modelLabel = 'Equipment';
 
     protected static ?string $pluralModelLabel = 'Equipment';
+
+    public static function getNavigationBadge(): ?string
+    {
+        return (string) Equipment::query()->count();
+    }
 
     public static function form(Schema $schema): Schema
     {

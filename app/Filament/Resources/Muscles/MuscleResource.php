@@ -13,18 +13,28 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class MuscleResource extends Resource
 {
     protected static ?string $model = Muscle::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedHeart;
+
+    protected static string|UnitEnum|null $navigationGroup = 'Content';
 
     protected static ?string $navigationLabel = 'Muscles';
+
+    protected static ?int $navigationSort = 30;
 
     protected static ?string $modelLabel = 'Muscle';
 
     protected static ?string $pluralModelLabel = 'Muscles';
+
+    public static function getNavigationBadge(): ?string
+    {
+        return (string) Muscle::query()->count();
+    }
 
     public static function form(Schema $schema): Schema
     {
