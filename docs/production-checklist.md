@@ -67,6 +67,9 @@ php artisan schedule:run
 
 ## Verification
 
+- [ ] Release checklist in `docs/release-checklist.md` has been completed for
+  the release candidate.
+
 - [ ] Formatter has passed:
 
 ```bash
@@ -87,3 +90,6 @@ curl http://localhost:8001/health
 
 - [ ] Deployment notes in `docs/deployment.md` still match the Dockerfile,
   compose file, Composer scripts, and environment example.
+- [ ] README documentation links point to existing files.
+- [ ] Admin import verification has been run through `/admin/import-exercises`
+  with `tests/Fixtures/exercises.json` in a disposable environment.
