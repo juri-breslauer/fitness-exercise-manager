@@ -20,6 +20,9 @@ class AuthorizationTest extends TestCase
     {
         $this->get('/admin')
             ->assertRedirect('/admin/login');
+
+        $this->get('/admin/profile')
+            ->assertRedirect('/admin/login');
     }
 
     public function test_non_admin_user_cannot_access_admin_panel_or_resources(): void
@@ -31,6 +34,7 @@ class AuthorizationTest extends TestCase
         $this->actingAs($user);
 
         $this->get('/admin')->assertForbidden();
+        $this->get('/admin/profile')->assertForbidden();
         $this->get('/admin/categories')->assertForbidden();
         $this->get('/admin/exercises/'.$exercise->id.'/edit')->assertForbidden();
         $this->get('/admin/import-exercises')->assertForbidden();
@@ -46,6 +50,7 @@ class AuthorizationTest extends TestCase
         $this->actingAs($admin);
 
         $this->get('/admin')->assertOk();
+        $this->get('/admin/profile')->assertOk();
         $this->get('/admin/categories')->assertOk();
         $this->get('/admin/categories/create')->assertOk();
         $this->get('/admin/categories/'.$category->id.'/edit')->assertOk();

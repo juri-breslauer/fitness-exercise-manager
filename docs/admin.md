@@ -14,6 +14,8 @@ Admin access is intentionally simple:
   muscles, equipment, exercises, and exercise media in Filament.
 - Non-admin users receive a forbidden response for admin panel pages and catalog
   management actions.
+- Admin users can edit their own profile settings at `/admin/profile`,
+  including name, email, and password.
 
 The catalog policies are registered in `App\Providers\AuthServiceProvider`:
 
