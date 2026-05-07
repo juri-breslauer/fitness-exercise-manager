@@ -117,13 +117,24 @@ Admins import exercise datasets from the Filament admin panel at `/admin`.
 
 ## API Endpoints
 
-Taxonomy endpoints return JSON API Resource collections ordered by `name`.
+The public exercise catalog API is versioned under `/api/v1`. Full request and
+response documentation is available in [`docs/api.md`](docs/api.md).
 
-| Method | Endpoint          | Description              |
-| ------ | ----------------- | ------------------------ |
-| GET    | `/api/categories` | List exercise categories |
-| GET    | `/api/muscles`    | List muscles             |
-| GET    | `/api/equipment`  | List equipment           |
+Taxonomy endpoints return JSON API Resource collections ordered by `name`.
+Exercise endpoints return only published exercises.
+
+| Method | Endpoint                         | Description                                      |
+| ------ | -------------------------------- | ------------------------------------------------ |
+| GET    | `/api/v1/categories`             | List exercise categories                         |
+| GET    | `/api/v1/muscles`                | List muscles                                     |
+| GET    | `/api/v1/equipment`              | List equipment                                   |
+| GET    | `/api/v1/exercises`              | List published exercises with filters and pages  |
+| GET    | `/api/v1/exercises/{slug}`       | Show a published exercise by slug                |
+
+`GET /api/v1/exercises` supports filtering by `search`, `category`, `muscle`,
+`equipment`, `difficulty`, `force`, and `mechanic`; pagination with `page` and
+`per_page`; and sorting with `sort=name`, `sort=-name`, `sort=created_at`,
+`sort=-created_at`, `sort=difficulty`, and `sort=-difficulty`.
 
 Example response:
 
@@ -137,6 +148,15 @@ Example response:
     }
   ]
 }
+```
+
+Example exercise queries:
+
+```bash
+curl "http://localhost:8001/api/v1/exercises?search=curl"
+curl "http://localhost:8001/api/v1/exercises?category=strength"
+curl "http://localhost:8001/api/v1/exercises?page=2&per_page=20"
+curl "http://localhost:8001/api/v1/exercises?sort=-created_at"
 ```
 
 ## Project Structure
