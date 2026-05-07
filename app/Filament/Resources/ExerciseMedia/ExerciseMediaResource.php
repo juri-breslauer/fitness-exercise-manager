@@ -13,18 +13,28 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class ExerciseMediaResource extends Resource
 {
     protected static ?string $model = ExerciseMedia::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedPhoto;
+
+    protected static string|UnitEnum|null $navigationGroup = 'Content';
 
     protected static ?string $navigationLabel = 'Exercise Media';
+
+    protected static ?int $navigationSort = 50;
 
     protected static ?string $modelLabel = 'Exercise Media';
 
     protected static ?string $pluralModelLabel = 'Exercise Media';
+
+    public static function getNavigationBadge(): ?string
+    {
+        return (string) ExerciseMedia::query()->count();
+    }
 
     public static function form(Schema $schema): Schema
     {

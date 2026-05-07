@@ -1,0 +1,49 @@
+[
+  {
+    "slug": "push-up",
+    "name": "Push Up",
+    "display_name": "Push-Up",
+    "aliases": ["press up"],
+    "description": "A bodyweight upper-body pushing exercise.",
+    "instructions": [
+      "Start in a high plank position.",
+      "Lower your chest toward the floor.",
+      "Press back to the starting position."
+    ],
+    "tips": [
+      "Keep your body in a straight line."
+    ],
+    "difficulty": "beginner",
+    "force": "push",
+    "mechanic": "compound",
+    "category": "strength",
+    "primary_muscles": ["chest", "triceps"],
+    "secondary_muscles": ["shoulders"],
+    "equipment": ["body only"],
+    "status": "published"
+  },
+  {
+    "slug": "bodyweight-squat",
+    "name": "Bodyweight Squat",
+    "display_name": null,
+    "aliases": ["air squat"],
+    "description": "A lower-body squat pattern performed without external load.",
+    "instructions": [
+      "Stand with feet around shoulder width.",
+      "Sit your hips down and back.",
+      "Drive through your feet to stand tall."
+    ],
+    "tips": [
+      "Keep your chest tall.",
+      "Track knees in line with toes."
+    ],
+    "difficulty": "beginner",
+    "force": "push",
+    "mechanic": "compound",
+    "category": "strength",
+    "primary_muscles": ["quadriceps", "glutes"],
+    "secondary_muscles": ["hamstrings"],
+    "equipment": ["body only"],
+    "status": "published"
+  }
+]
