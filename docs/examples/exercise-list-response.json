@@ -1,0 +1,110 @@
+{
+  "data": [
+    {
+      "id": 10,
+      "category_id": 1,
+      "slug": "dumbbell-curl",
+      "name": "Dumbbell Curl",
+      "display_name": "Dumbbell Curl",
+      "aliases": ["db curl"],
+      "description": "An upper-arm pulling exercise performed with dumbbells.",
+      "instructions": [
+        "Stand tall with a dumbbell in each hand.",
+        "Curl the dumbbells while keeping your elbows close to your sides.",
+        "Lower the dumbbells under control."
+      ],
+      "tips": ["Avoid swinging your torso."],
+      "difficulty": "beginner",
+      "force": "pull",
+      "mechanic": "isolation",
+      "status": "published",
+      "category": {
+        "id": 1,
+        "name": "Strength",
+        "slug": "strength"
+      },
+      "primary_muscles": [
+        {
+          "id": 5,
+          "name": "Biceps",
+          "slug": "biceps",
+          "role": "primary"
+        }
+      ],
+      "secondary_muscles": [],
+      "equipment": [
+        {
+          "id": 3,
+          "name": "Dumbbell",
+          "slug": "dumbbell",
+          "is_optional": false
+        }
+      ],
+      "media": [
+        {
+          "id": 20,
+          "type": "image",
+          "url": "https://example.com/dumbbell-curl.jpg",
+          "disk": null,
+          "path": null,
+          "source": "example",
+          "position": 1,
+          "is_primary": true,
+          "metadata": {
+            "alt": "Dumbbell curl start position"
+          }
+        }
+      ],
+      "primary_media": {
+        "id": 20,
+        "type": "image",
+        "url": "https://example.com/dumbbell-curl.jpg",
+        "disk": null,
+        "path": null,
+        "source": "example",
+        "position": 1,
+        "is_primary": true,
+        "metadata": {
+          "alt": "Dumbbell curl start position"
+        }
+      }
+    }
+  ],
+  "links": {
+    "first": "http://localhost:8001/api/v1/exercises?page=1",
+    "last": "http://localhost:8001/api/v1/exercises?page=3",
+    "prev": null,
+    "next": "http://localhost:8001/api/v1/exercises?page=2"
+  },
+  "meta": {
+    "current_page": 1,
+    "from": 1,
+    "last_page": 3,
+    "links": [
+      {
+        "url": null,
+        "label": "&laquo; Previous",
+        "active": false
+      },
+      {
+        "url": "http://localhost:8001/api/v1/exercises?page=1",
+        "label": "1",
+        "active": true
+      },
+      {
+        "url": "http://localhost:8001/api/v1/exercises?page=2",
+        "label": "2",
+        "active": false
+      },
+      {
+        "url": "http://localhost:8001/api/v1/exercises?page=2",
+        "label": "Next &raquo;",
+        "active": false
+      }
+    ],
+    "path": "http://localhost:8001/api/v1/exercises",
+    "per_page": 20,
+    "to": 20,
+    "total": 50
+  }
+}
