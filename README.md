@@ -1,27 +1,50 @@
 # Fitness Exercise Manager
 
-Fitness Exercise Manager is a Laravel-powered application for managing a structured fitness exercise catalog with media support, an admin panel, and an API-first architecture.
+[![CI](https://github.com/juri-breslauer/fitness-exercise-manager/actions/workflows/ci.yml/badge.svg)](https://github.com/juri-breslauer/fitness-exercise-manager/actions/workflows/ci.yml)
+[![Docker Publish](https://github.com/juri-breslauer/fitness-exercise-manager/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/juri-breslauer/fitness-exercise-manager/actions/workflows/docker-publish.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![PHP 8.4](https://img.shields.io/badge/PHP-8.4-777bb4.svg)](composer.json)
 
-The project is intended as a portfolio-grade backend system that demonstrates clean application structure, dataset import workflows, media handling, and REST API development in a real-world Laravel environment.
+Fitness Exercise Manager is a Laravel application for managing a structured
+fitness exercise catalog with taxonomy data, media records, a Filament admin
+panel, and a public read-only API.
 
-## Features
+The project is portfolio-ready backend work: it demonstrates a practical
+Laravel/Filament architecture, policy-protected admin workflows, Docker-based
+runtime setup, dataset import through the admin panel, and documented API
+contracts.
 
-- Exercise catalog with categories and detailed exercise data
-- Media support for images and GIF demonstrations
-- Admin panel for managing exercises, categories, and related content
-- REST API designed as the primary integration layer
-- JSON dataset import via the Filament admin panel
-- Service and Repository based application structure
+Current release baseline: `0.3.1`.
+
+## Current Capabilities
+
+- Filament admin panel at `/admin` with session login and admin-only access.
+- Catalog management for exercises, categories, muscles, equipment, and exercise
+  media.
+- Admin profile management at `/admin/profile`.
+- JSON exercise dataset import from the Filament admin page
+  `/admin/import-exercises`, including dry-run preview and import summary.
+- Public read-only API under `/api/v1` for categories, muscles, equipment, and
+  published exercises.
+- Exercise filtering, pagination, sorting, and JSON Resource responses.
+- Lightweight application health endpoint at `/health`.
+- Docker Compose stack for local app, PostgreSQL, and Redis.
+- CI for Composer validation, PHPUnit, Pint, Composer PSR checks, PHP syntax
+  checks, and optional static analysis when PHPStan or Psalm is installed.
+- Docker image publish workflow with SBOM and provenance attestations.
 
 ## Tech Stack
 
-- PHP 8.4
-- Laravel
-- PostgreSQL
-- Redis
-- Docker
+- PHP `^8.4`
+- Laravel `^13.7`
+- Filament `^5.6`
+- PostgreSQL 17 Alpine in Docker Compose
+- Redis 7 Alpine in Docker Compose
+- Vite 8 and Tailwind CSS 4 for frontend asset building
+- PHPUnit 12 and Laravel Pint for quality checks
+- Docker image based on `php:8.4-fpm-alpine`
 
-## Installation
+## Quick Start
 
 ```bash
 git clone git@github.com:juri-breslauer/fitness-exercise-manager.git
@@ -35,60 +58,81 @@ docker compose exec app php artisan key:generate
 docker compose exec app php artisan migrate --seed
 ```
 
-The application is available at `http://localhost:8001` by default. PostgreSQL is exposed on host port `54320` and Redis on host port `63790`.
+The Docker Compose app is available at `http://localhost:8001` by default.
+PostgreSQL is exposed on host port `54320`, and Redis is exposed on host port
+`63790`.
 
-## Production Readiness
+Default seeded admin credentials:
 
-The application exposes a lightweight health endpoint:
+```text
+Email: admin@example.com
+Password: password
+```
+
+These defaults are for local development only. Override `ADMIN_EMAIL`,
+`ADMIN_NAME`, and `ADMIN_PASSWORD` before seeding any shared environment.
+
+## Admin Access
+
+The Filament admin panel is available at:
+
+```text
+http://localhost:8001/admin
+```
+
+Admin access requires an authenticated user with `users.is_admin = true`.
+Guests are redirected to `/admin/login`, and non-admin users are forbidden from
+admin pages and catalog management actions.
+
+See [docs/admin.md](docs/admin.md) for the complete admin access and import
+workflow notes.
+
+## API Overview
+
+The public catalog API is read-only and versioned under `/api/v1`.
+
+| Method | Endpoint | Description |
+| --- | --- | --- |
+| GET | `/health` | Lightweight application health check |
+| GET | `/api/v1/categories` | List exercise categories |
+| GET | `/api/v1/muscles` | List muscles |
+| GET | `/api/v1/equipment` | List equipment |
+| GET | `/api/v1/exercises` | List published exercises with filters, pagination, and sorting |
+| GET | `/api/v1/exercises/{slug}` | Show a published exercise by slug |
+
+Example requests:
 
 ```bash
 curl http://localhost:8001/health
+curl http://localhost:8001/api/v1/categories
+curl "http://localhost:8001/api/v1/exercises?category=strength&sort=name"
+curl http://localhost:8001/api/v1/exercises/push-up
 ```
 
-Expected response:
+`GET /api/v1/exercises` supports filtering by `search`, `category`, `muscle`,
+`equipment`, `difficulty`, `force`, `mechanic`, and `status=published`;
+pagination with `page` and `per_page`; and sorting with `sort=name`,
+`sort=-name`, `sort=created_at`, `sort=-created_at`, `sort=difficulty`, and
+`sort=-difficulty`.
 
-```json
-{
-  "status": "ok",
-  "app": "Fitness Exercise Manager"
-}
-```
+Full request and response documentation is available in [docs/api.md](docs/api.md).
 
-Deployment notes, required environment variables, Docker compose usage, cache
-optimization commands, queue worker guidance, scheduler notes, storage/log
-permissions, and app key setup are documented in
-[`docs/deployment.md`](docs/deployment.md).
+## Dataset Import
 
-Use [`docs/production-checklist.md`](docs/production-checklist.md) before
-promoting a release.
+Exercise imports are handled from the Filament admin panel, not from an Artisan
+command.
 
-Common production commands:
+Open `/admin/import-exercises` as an admin user and use:
 
-```bash
-php artisan key:generate
-php artisan migrate --force
-php artisan optimize:clear
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
-php artisan queue:work redis --queue=default --tries=3 --timeout=90
-php artisan schedule:run
-```
+- `Dry Run` to validate the uploaded JSON and preview created or updated
+  records.
+- `Import JSON` to persist valid rows.
 
-## Exercise Dataset Import
+The import accepts a JSON array of exercise objects. The `slug` field is the
+idempotency key. Categories, muscles, and equipment are upserted by normalized
+slug before exercises and relationships are saved.
 
-Exercise imports use a small project-owned JSON contract. Uploaded files must
-match the canonical format below.
-
-Large production datasets should not be committed to this repository. Keep only
-small fixtures for tests.
-
-The v1 import format is single-locale. Translated exercise content is out of
-scope until the application has a supported translation storage model.
-
-### Fitness Exercise Import JSON v1
-
-The import file must be a JSON array of exercise objects:
+Minimal example:
 
 ```json
 [
@@ -103,9 +147,7 @@ The import file must be a JSON array of exercise objects:
       "Lower your chest toward the floor.",
       "Press back to the starting position."
     ],
-    "tips": [
-      "Keep your body in a straight line."
-    ],
+    "tips": ["Keep your body in a straight line."],
     "difficulty": "beginner",
     "force": "push",
     "mechanic": "compound",
@@ -118,102 +160,57 @@ The import file must be a JSON array of exercise objects:
 ]
 ```
 
-Import behavior:
+Media import is intentionally out of scope until a separate media import
+contract exists. Large production datasets should not be committed to this
+repository; keep only small fixtures for tests.
 
-- `slug` is the idempotency key for exercises.
-- `category`, `primary_muscles`, `secondary_muscles`, and `equipment` contain
-  taxonomy values that are imported with the exercise.
-- Taxonomy values are normalized into slugs. For example, `body only` becomes
-  `body-only`.
-- Taxonomy names are generated from the normalized values when new records are
-  created. For example, `body only` becomes `Body Only`.
-- Categories, muscles, and equipment are upserted by slug before the exercise is
-  saved.
-- Exercises are upserted by slug.
-- `primary_muscles` are synced with `role = primary`.
-- `secondary_muscles` are synced with `role = secondary`.
-- `equipment` is always an array; use an empty array when no equipment is required.
-- Media import is intentionally out of scope until it has its own supported
-  contract.
+## Quality Checks
 
-Taxonomy example:
-
-```json
-{
-  "category": "strength",
-  "primary_muscles": ["chest", "triceps"],
-  "secondary_muscles": ["shoulders"],
-  "equipment": ["body only"]
-}
-```
-
-This creates or reuses `Strength` in categories, `Chest`, `Triceps`, and
-`Shoulders` in muscles, and `Body Only` in equipment. The exercise is then linked
-to those records through `exercise_muscle` and `exercise_equipment`.
-
-Admins import exercise datasets from the Filament admin panel at `/admin`.
-
-## Admin Access
-
-Filament admin access is restricted to authenticated users with
-`users.is_admin = true`. Catalog management actions are protected by model
-policies for categories, muscles, equipment, exercises, and exercise media.
-
-See [`docs/admin.md`](docs/admin.md) for the complete admin access rules.
-
-## API Endpoints
-
-The public exercise catalog API is versioned under `/api/v1`. Full request and
-response documentation is available in [`docs/api.md`](docs/api.md).
-
-Taxonomy endpoints return JSON API Resource collections ordered by `name`.
-Exercise endpoints return only published exercises.
-
-| Method | Endpoint                         | Description                                      |
-| ------ | -------------------------------- | ------------------------------------------------ |
-| GET    | `/health`                        | Lightweight application health check             |
-| GET    | `/api/v1/categories`             | List exercise categories                         |
-| GET    | `/api/v1/muscles`                | List muscles                                     |
-| GET    | `/api/v1/equipment`              | List equipment                                   |
-| GET    | `/api/v1/exercises`              | List published exercises with filters and pages  |
-| GET    | `/api/v1/exercises/{slug}`       | Show a published exercise by slug                |
-
-`GET /api/v1/exercises` supports filtering by `search`, `category`, `muscle`,
-`equipment`, `difficulty`, `force`, and `mechanic`; pagination with `page` and
-`per_page`; and sorting with `sort=name`, `sort=-name`, `sort=created_at`,
-`sort=-created_at`, `sort=difficulty`, and `sort=-difficulty`.
-
-Example response:
-
-```json
-{
-  "data": [
-    {
-      "id": 1,
-      "name": "Strength",
-      "slug": "strength"
-    }
-  ]
-}
-```
-
-Example exercise queries:
+Commands used by CI:
 
 ```bash
-curl "http://localhost:8001/api/v1/exercises?search=curl"
-curl "http://localhost:8001/api/v1/exercises?category=strength"
-curl "http://localhost:8001/api/v1/exercises?page=2&per_page=20"
-curl "http://localhost:8001/api/v1/exercises?sort=-created_at"
+composer validate --strict
+composer install --no-interaction --no-progress --prefer-dist
+composer test
+vendor/bin/pint --test
+composer dump-autoload --strict-psr
+find app bootstrap config database routes tests -name '*.php' -print0 | xargs -0 -n 1 php -l
 ```
 
-## Project Structure
+Local formatting:
 
-- Services: business logic
-- Repositories: data access layer
-- DTOs: data transfer objects
-- Console Commands: dataset import and maintenance tasks
-- API Resources: consistent JSON responses
+```bash
+vendor/bin/pint
+```
 
+Fresh install verification should include Docker build/start, migrations and
+seeders, `/health`, representative `/api/v1` requests, `/admin` login, and the
+dataset import fixture at [tests/Fixtures/exercises.json](tests/Fixtures/exercises.json).
+
+## Documentation
+
+- [Public API v1](docs/api.md)
+- [Admin access and import workflow](docs/admin.md)
+- [Deployment notes](docs/deployment.md)
+- [Production checklist](docs/production-checklist.md)
+- [Release checklist](docs/release-checklist.md)
+- [Changelog](CHANGELOG.md)
+
+## Roadmap
+
+- Expand catalog content with curated, source-controlled fixture coverage.
+- Define a supported media import contract for images, GIFs, and videos.
+- Add richer API examples for common client integrations.
+- Add optional static analysis tooling once the codebase is ready to enforce it
+  in CI.
+- Introduce release-specific verification notes as production workflows mature.
+- Keep Docker and deployment docs aligned with any future runtime changes.
+
+## License
+
+This project is open-sourced under the [MIT license](LICENSE).
+
+Copyright (c) 2026 Juri Breslauer.
 
 ## Author
 

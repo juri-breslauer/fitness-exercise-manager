@@ -62,7 +62,18 @@ Host-only Docker variables:
 
 ## First Run
 
-Install dependencies and create the environment file:
+For the Docker Compose path used by this repository, create the environment file
+and start the stack:
+
+```bash
+cp .env.example .env
+docker compose up -d --build
+docker compose exec app php artisan key:generate
+docker compose exec app php artisan migrate --seed
+```
+
+For a non-Docker production-like install, install dependencies and create the
+environment file:
 
 ```bash
 cp .env.example .env
