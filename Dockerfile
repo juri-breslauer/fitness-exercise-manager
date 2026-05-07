@@ -2,8 +2,14 @@ FROM php:8.4-fpm-alpine
 
 WORKDIR /var/www/html
 
-RUN apk add --no-cache \
-        bash \
+RUN apk upgrade --no-cache \
+    && apk add --no-cache \
+        icu-libs \
+        libzip \
+        oniguruma \
+        postgresql-libs \
+    && apk add --no-cache --virtual .build-deps \
+        $PHPIZE_DEPS \
         git \
         icu-dev \
         libzip-dev \
@@ -11,7 +17,6 @@ RUN apk add --no-cache \
         postgresql-dev \
         unzip \
         zip \
-    && apk add --no-cache --virtual .build-deps $PHPIZE_DEPS \
     && docker-php-ext-install \
         bcmath \
         intl \
@@ -25,11 +30,22 @@ RUN apk add --no-cache \
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-COPY composer.json composer.lock ./
-RUN composer install --no-interaction --prefer-dist --optimize-autoloader --no-scripts
+COPY --chown=www-data:www-data composer.json composer.lock ./
+RUN composer install \
+        --no-dev \
+        --no-interaction \
+        --no-progress \
+        --prefer-dist \
+        --optimize-autoloader \
+        --no-scripts \
+    && composer clear-cache
 
-COPY . .
-RUN composer dump-autoload --optimize
+COPY --chown=www-data:www-data . .
+RUN composer dump-autoload --optimize \
+    && chown -R www-data:www-data /var/www/html \
+    && chmod -R ug+rw storage bootstrap/cache
+
+USER www-data
 
 EXPOSE 8000
 

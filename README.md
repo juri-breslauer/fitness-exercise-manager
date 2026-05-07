@@ -37,6 +37,44 @@ docker compose exec app php artisan migrate --seed
 
 The application is available at `http://localhost:8001` by default. PostgreSQL is exposed on host port `54320` and Redis on host port `63790`.
 
+## Production Readiness
+
+The application exposes a lightweight health endpoint:
+
+```bash
+curl http://localhost:8001/health
+```
+
+Expected response:
+
+```json
+{
+  "status": "ok",
+  "app": "Fitness Exercise Manager"
+}
+```
+
+Deployment notes, required environment variables, Docker compose usage, cache
+optimization commands, queue worker guidance, scheduler notes, storage/log
+permissions, and app key setup are documented in
+[`docs/deployment.md`](docs/deployment.md).
+
+Use [`docs/production-checklist.md`](docs/production-checklist.md) before
+promoting a release.
+
+Common production commands:
+
+```bash
+php artisan key:generate
+php artisan migrate --force
+php artisan optimize:clear
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+php artisan queue:work redis --queue=default --tries=3 --timeout=90
+php artisan schedule:run
+```
+
 ## Exercise Dataset Import
 
 Exercise imports use a small project-owned JSON contract. Uploaded files must
@@ -133,6 +171,7 @@ Exercise endpoints return only published exercises.
 
 | Method | Endpoint                         | Description                                      |
 | ------ | -------------------------------- | ------------------------------------------------ |
+| GET    | `/health`                        | Lightweight application health check             |
 | GET    | `/api/v1/categories`             | List exercise categories                         |
 | GET    | `/api/v1/muscles`                | List muscles                                     |
 | GET    | `/api/v1/equipment`              | List equipment                                   |
