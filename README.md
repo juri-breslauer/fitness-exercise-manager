@@ -9,12 +9,18 @@ Fitness Exercise Manager is a Laravel application for managing a structured
 fitness exercise catalog with taxonomy data, media records, a Filament admin
 panel, and a public read-only API.
 
-The project is portfolio-ready backend work: it demonstrates a practical
-Laravel/Filament architecture, policy-protected admin workflows, Docker-based
-runtime setup, dataset import through the admin panel, and documented API
-contracts.
-
 Current release baseline: `0.3.1`.
+
+## Motivation
+
+Fitness Exercise Manager was started as the backend foundation for my iOS
+workout tracker, Muscle Memo.
+
+The project is designed as a structured, self-hostable Laravel backend for
+exercise catalog management. It can support Muscle Memo and also serve as a
+reusable foundation for other fitness applications that need exercises, muscles,
+equipment, media metadata, admin workflows, import tools, and a versioned REST
+API.
 
 ## Current Capabilities
 
